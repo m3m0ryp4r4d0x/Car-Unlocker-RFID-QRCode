@@ -1,0 +1,101 @@
+#include <SPI.h>
+#include <RFID.h>
+#include <LiquidCrystal.h>
+/* RFID READER PINS */
+#define SDA_DIO 10  // Pin 53 Arduino Mega
+#define RESET_DIO 9
+#define delayRead 1000 // Tempo 
+#define delayLed 1000 
+#define ledVerde 3
+#define ledRosso 4
+#define rele 2
+
+RFID RC522(SDA_DIO, RESET_DIO); 
+  // inserire tutti i codici esadecimali delle schede magnetiche riconosciute 
+String codiceAutorizzato1 = "XXXXXXXXXX";//PUT YOUR CODE HERE
+String codiceAutorizzato2 = "XXXXXXXXXX";
+String codiceAutorizzato3 = "XXXXXXXXXX";
+
+bool bloccata=false;
+// if you use an lcd display
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+
+
+void setup()
+{ 
+  Serial.begin(9600);
+  /*SPI ON*/
+  SPI.begin(); 
+  /*INIT RFID READER*/
+  RC522.init();
+  Serial.println("Setup");
+  pinMode(ledVerde,OUTPUT);
+  pinMode(ledRosso,OUTPUT);
+ 
+}
+  
+void loop()
+{
+  /* Temporary loop counter */
+  byte i;
+  // Se viene letta una tessera
+  if (RC522.isCard())
+  {
+    // READ CARD SERIAL
+    RC522.readCardSerial();
+    String codiceLetto ="";
+    Serial.println("Codice delle tessera letto:");
+  
+    // COnvert hex value to string
+    for(i = 0; i <= 4; i++)
+    {
+      codiceLetto+= String (RC522.serNum[i],HEX);
+      codiceLetto.toUpperCase();
+    }
+    Serial.println(codiceLetto);
+    if(verificaCodice(codiceLetto,codiceAutorizzato1)||verificaCodice(codiceLetto,codiceAutorizzato2)
+    ||verificaCodice(codiceLetto,codiceAutorizzato3)){
+      Serial.println("Tessera autorizzata");
+      delay(1000);
+      /*In my car i use a rele in order to lock and unlock the car*/
+      
+      if(bloccata==false)
+      {
+          //digitalWrite (rele, HIGH);
+          //delay (1000);     // Tempo relè¨ in stato ON
+          //digitalWrite (rele, LOW);
+          bloccata=true;  
+          Serial.println("Stato macchina: chiusa");
+      }
+      else
+      {
+        //digitalWrite (rele, HIGH);
+        //delay (1000);     // Tempo relè¨ in stato ON
+        //digitalWrite (rele, LOW);
+        bloccata=false;
+        Serial.println("Stato macchina: aperta");
+      }
+      
+    }else{
+      Serial.println("Tessera non autorizzata");
+      
+      accendiLed(ledRosso);
+    }
+  //delay(delayRead);  
+  }
+}
+// Questa funzione verifica se il codice Letto Ã¨ autorizzato
+boolean verificaCodice(String codiceLetto, String codiceAutorizzato){
+
+  if(codiceLetto.equals(codiceAutorizzato)){
+    return true;
+  }else{
+    return false;
+  }  
+}    
+// Questa funzione permette di accendere un LED per un determinato periodo
+void accendiLed(int ledPin){
+  digitalWrite(ledPin,HIGH);
+  delay(delayLed);
+  digitalWrite(ledPin,LOW);
+}
