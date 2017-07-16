@@ -5,21 +5,15 @@
 #define SDA_DIO 10  // Pin 53 Arduino Mega
 #define RESET_DIO 9
 #define delayRead 1000 // Tempo 
-#define delayLed 1000 
-#define ledVerde 3
-#define ledRosso 4
-#define rele 2
+
 
 RFID RC522(SDA_DIO, RESET_DIO); 
   // inserire tutti i codici esadecimali delle schede magnetiche riconosciute 
-String codiceAutorizzato1 = "XXXXXXXXXX";//PUT YOUR CODE HERE
-String codiceAutorizzato2 = "XXXXXXXXXX";
-String codiceAutorizzato3 = "XXXXXXXXXX";
+String codiceAutorizzato1 = "A062F67347";
+String codiceAutorizzato2 = "ESEMPIO479";
+String codiceAutorizzato3 = "F528A8552";
 
 bool bloccata=false;
-// if you use an lcd display
-LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
-
 
 void setup()
 { 
@@ -29,8 +23,13 @@ void setup()
   /*INIT RFID READER*/
   RC522.init();
   Serial.println("Setup");
-  pinMode(ledVerde,OUTPUT);
-  pinMode(ledRosso,OUTPUT);
+  if(bloccata==false)
+  Serial.println("Stato attuale della macchina: Aperta");
+  else
+  Serial.println("Stato attuale della macchina: Chiusa");
+  pinMode(6,OUTPUT);
+  pinMode(7,OUTPUT);
+  
  
 }
   
@@ -59,27 +58,31 @@ void loop()
       delay(1000);
       /*In my car i use a rele in order to lock and unlock the car*/
       
-      if(bloccata==false)
+      if(bloccata)
       {
-          //digitalWrite (rele, HIGH);
-          //delay (1000);     // Tempo relè¨ in stato ON
-          //digitalWrite (rele, LOW);
-          bloccata=true;  
-          Serial.println("Stato macchina: chiusa");
+        Serial.println("Stato macchina: chiusa");
+          digitalWrite(6,HIGH);
+          delay(2000);
+          digitalWrite(6,LOW);
+          Serial.println("Stato macchina: aperta");
+          bloccata=false;
+          
+          
       }
       else
       {
-        //digitalWrite (rele, HIGH);
-        //delay (1000);     // Tempo relè¨ in stato ON
-        //digitalWrite (rele, LOW);
-        bloccata=false;
-        Serial.println("Stato macchina: aperta");
+         Serial.println("Stato macchina: aperta");
+        digitalWrite(7,HIGH);              // wait few milliseconds
+        delay(2000);
+        digitalWrite(7,LOW);
+        Serial.println("Stato macchina: chiusa");
+        bloccata=true;
       }
       
     }else{
       Serial.println("Tessera non autorizzata");
       
-      accendiLed(ledRosso);
+     
     }
   //delay(delayRead);  
   }
@@ -93,9 +96,4 @@ boolean verificaCodice(String codiceLetto, String codiceAutorizzato){
     return false;
   }  
 }    
-// Questa funzione permette di accendere un LED per un determinato periodo
-void accendiLed(int ledPin){
-  digitalWrite(ledPin,HIGH);
-  delay(delayLed);
-  digitalWrite(ledPin,LOW);
-}
+
