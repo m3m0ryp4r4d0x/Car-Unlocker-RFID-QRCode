@@ -9,9 +9,9 @@
 
 RFID RC522(SDA_DIO, RESET_DIO); 
   // inserire tutti i codici esadecimali delle schede magnetiche riconosciute 
-String codiceAutorizzato1 = "A062F67347";
-String codiceAutorizzato2 = "ESEMPIO479";
-String codiceAutorizzato3 = "F528A8552";
+String codiceAutorizzato1 = "XXXXXXXXXX";
+String codiceAutorizzato2 = "XXXXXXXXXX";
+String codiceAutorizzato3 = "XXXXXXXXXX";
 
 bool bloccata=false;
 
